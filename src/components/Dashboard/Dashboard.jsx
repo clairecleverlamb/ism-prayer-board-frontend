@@ -1,234 +1,122 @@
-import { useState, useEffect } from "react";
-import Column from "./Column";
-import Header from "./Header";
+import { useEffect, useState, useContext } from "react";
+import { getPrayers, createPrayer, prayFor, unprayFor } from "../../services/prayerService";
+import { UserContext } from "../../contexts/UserContext";
 import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
-import { getDays, createDay, deleteDay } from "../../services/days";
-import { createMeal, deleteMeal, updateMeal } from "../../services/meals";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { getMeals } from "../../services/meals";
-import DashboardNavBar from "../DashboardNavBar/DashboardNavBar";
-import MainLayout from "../layouts/MainLayout";
-import MealDialogForm from "./MealDialogForm";
-
-const MEAL_SECTIONS = [
-  "breakfast",
-  "first snack",
-  "lunch",
-  "second snack",
-  "dinner",
-];
+import { Dialog, DialogContent } from "../ui/dialog";
+import PrayerCard from "./PrayerCard";
+import SignInInline from "./SignInInline";
+import PrayerDialogForm from "./PrayerDialogForm";
 
 const Dashboard = () => {
-  const [cards, setCards] = useState([]);
-  const [days, setDays] = useState([]);
+  const { user } = useContext(UserContext);
+  const [prayers, setPrayers] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [newMeal, setNewMeal] = useState({ title: "", note: "" });
-  const [selectedMeal, setSelectedMeal] = useState(null);
+  const [newPrayer, setNewPrayer] = useState({
+    studentName: "",
+    ministryGroup: "",
+    content: "",
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchDays() {
-      const result = await getDays();
-      setDays(result);
-    }
-
-    fetchDays();
+    fetchPrayers();
   }, []);
 
-  useEffect(() => {
-    async function fetchMeals() {
-      try {
-        const data = await getMeals();
-        const transformed = data.map((meal) => ({
-          ...meal,
-          id: meal._id,
-          column:
-            meal.mealType === "unassigned" ? "fridge" : meal.column || "fridge",
-          mealType: meal.mealType || "unassigned",
-        }));
-        setCards(transformed);
-      } catch (err) {
-        console.error("Failed to fetch meals:", err);
-      }
+  const fetchPrayers = async () => {
+    try {
+      const data = await getPrayers();
+      setPrayers(data);
+    } catch (err) {
+      console.error("Error loading prayers", err);
+    } finally {
+      setLoading(false);
     }
-
-    fetchMeals();
-  }, []);
-
-  const getTitleFromDate = (date) => {
-    const today = new Date();
-    const isToday = new Date(date).toDateString() === today.toDateString();
-
-    const tomorrow = new Date();
-    tomorrow.setDate(today.getDate() + 1);
-    const isTomorrow =
-      new Date(date).toDateString() === tomorrow.toDateString();
-
-    if (isToday) return "Today";
-    if (isTomorrow) return "Tomorrow";
-
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "long",
-      day: "numeric",
-      weekday: "long",
-    });
   };
 
-  function handleCreateClick() {
-    setDialogOpen(true);
-  }
-
-  async function handleSaveMeal() {
-    if (!newMeal.title.trim()) return;
-
+  const handleCreatePrayer = async () => {
     try {
-      const created = await createMeal(newMeal);
-      const meal = {
-        ...created,
-        id: created._id,
-        column: "fridge",
-        mealType: "unassigned",
-      };
-      setCards((prev) => [...prev, meal]);
-      setNewMeal({ title: "", note: "" });
-      setDialogOpen(false);
-    } catch (err) {
-      console.error("Failed to create meal:", err);
-    }
-  }
+      if (!newPrayer.studentName || !newPrayer.content) {
+        alert("Please fill out both Student Name and Prayer Content!");
+        return;
+      }
 
-  function handleEditMeal(meal) {
-    setSelectedMeal(meal);
-    setDialogOpen(true);
-  }
-
-  async function handleUpdateMeal() {
-    if (!selectedMeal?.title.trim()) return;
-
-    try {
-      const res = await updateMeal(selectedMeal.id, {
-        title: selectedMeal.title,
-        note: selectedMeal.note,
+      const created = await createPrayer({
+        ...newPrayer,
+        createdBy: user._id,
       });
 
-      const updated = {
-        ...res,
-        id: res._id,
-        column:
-          res.mealType === "unassigned" ? "fridge" : res.column || "fridge",
-        mealType: res.mealType || "unassigned",
-      };
-
-      setCards((prev) =>
-        prev.map((m) => (m.id === selectedMeal.id ? updated : m))
-      );
-
+      setPrayers((prev) => [created, ...prev]);
+      setNewPrayer({ studentName: "", ministryGroup: "", content: "" });
       setDialogOpen(false);
-      setSelectedMeal(null);
     } catch (err) {
-      console.error("Failed to update meal:", err);
+      console.error("Error creating prayer", err);
     }
-  }
+  };
 
-  async function handleDeleteMeal() {
-    try {
-      await deleteMeal(selectedMeal.id);
-      setCards((prev) => prev.filter((m) => m.id !== selectedMeal.id));
-      setDialogOpen(false);
-      setSelectedMeal(null);
-    } catch (err) {
-      console.error("Failed to delete meal:", err);
+  const handlePray = async (prayerId) => {
+    if (!user) {
+      alert("Please sign in first to pray!");
+      return;
     }
-  }
+    await prayFor(prayerId, user._id);
+    await fetchPrayers();
+  };
 
-  async function handleAddDay() {
-    const nextIndex = days.length;
-    const today = new Date();
-    const newDate = new Date(today);
-    newDate.setDate(today.getDate() + nextIndex);
-
-    try {
-      const createdDay = await createDay(newDate);
-
-      setDays((prev) => [...prev, createdDay]);
-    } catch (error) {
-      console.error("Failed to create day:", error);
+  const handleUnpray = async (prayerId) => {
+    if (!user) {
+      alert("Please sign in first to unpray!");
+      return;
     }
-  }
+    await unprayFor(prayerId, user._id);
+    await fetchPrayers();
+  };
 
-  async function handleDeleteDay(id) {
-    await deleteDay(id);
-    setDays((prev) => prev.filter((day) => day._id !== id));
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading prayers...</div>;
   }
 
   return (
-    <MainLayout>
-      <DashboardNavBar />
-      <Header />
-      <div className="h-screen w-full">
-        <div className="p-2 flex  gap-3 overflow-scroll rounded-xl bg-neutral-100 w-full ">
-          <Column
-            title="Fridge"
-            column="fridge"
-            cards={cards}
-            setCards={setCards}
-            mealSections={["unassigned"]}
-            onCreate={handleCreateClick}
-            onEdit={handleEditMeal}
-          />
-          {days.map((day) => (
-            <Column
-              day={day}
-              key={day._id}
-              title={getTitleFromDate(day.date)}
-              column={day._id}
-              cards={cards}
-              setCards={setCards}
-              mealSections={MEAL_SECTIONS}
-              onDelete={handleDeleteDay}
-              onEdit={handleEditMeal}
-            />
-          ))}
-          <Button
-            onClick={handleAddDay}
-            className="w-full !justify-start w-56 shrink-0"
-          >
-            <Plus />
-            Add Day
+    <div className="flex flex-col items-center p-4">
+      {!user ? (
+        <>
+          <h1 className="text-3xl font-bold mb-6">Welcome to ISM Prayer Board 🙏</h1>
+          <SignInInline />
+        </>
+      ) : (
+        <>
+          <h2 className="text-xl font-semibold mb-6">Welcome back, {user.username}! ✨</h2>
+          <Button onClick={() => setDialogOpen(true)} className="mb-6">
+            Add New Prayer
           </Button>
-        </div>
+        </>
+      )}
+
+      {/* Render all prayers */}
+      <div className="flex flex-wrap justify-center gap-4">
+        {prayers.map((prayer) => (
+          <PrayerCard
+            key={prayer._id || Math.random()}
+            prayer={prayer}
+            userId={user?._id}
+            onPray={handlePray}
+            onUnpray={handleUnpray}
+          />
+        ))}
       </div>
 
-      <Dialog
-        open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) {
-            setSelectedMeal(null);
-            setNewMeal({ title: "", note: "" });
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-[425px] p-0">
-          {selectedMeal ? (
-            <MealDialogForm
-              mode="edit"
-              meal={selectedMeal}
-              onChange={setSelectedMeal}
-              onSubmit={handleUpdateMeal}
-              onDelete={handleDeleteMeal}
+      {/* Dialog for adding a prayer */}
+      {user && (
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="p-6">
+            <PrayerDialogForm
+              prayer={newPrayer}
+              onChange={setNewPrayer}
+              onSubmit={handleCreatePrayer}
             />
-          ) : (
-            <MealDialogForm
-              mode="create"
-              meal={newMeal}
-              onChange={setNewMeal}
-              onSubmit={handleSaveMeal}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-    </MainLayout>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
   );
 };
 

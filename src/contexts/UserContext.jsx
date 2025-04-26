@@ -11,8 +11,6 @@ const getUserFromToken = () => {
 
 function UserProvider({ children }) {
     const [user, setUser] = useState(getUserFromToken());
-    // the children prop represents each component we provide context to
-    
     const value = { user, setUser };
     
     return (
