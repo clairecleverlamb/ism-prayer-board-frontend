@@ -79,7 +79,7 @@ const Dashboard = () => {
     <div className="flex flex-col items-center p-4">
       {!user ? (
         <>
-          <h1 className="text-3xl font-bold mb-6">Welcome to ISM Prayer Board 🙏</h1>
+          <h1 className="text-3xl font-bold mb-6">Welcome to ISM Prayer Board</h1>
           <SignInInline />
         </>
       ) : (
