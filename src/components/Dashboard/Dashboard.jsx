@@ -98,7 +98,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 max-w-screen-md mx-auto relative">
+    <div className="flex flex-col items-center px-4 pt-20 sm:pt-6 max-w-screen-md mx-auto relative">
       
       {/* Sticky Toggle Button */}
       {user && prayers.length > 0 && (
@@ -112,7 +112,7 @@ const Dashboard = () => {
         </Button>
       )}
 
-      {/* ✨ Title Area */}
+      {/*  Title Area */}
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-indigo-700 mb-2 tracking-tight drop-shadow-sm">
           ISM Prayer Board
