@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import { getPrayers, createPrayer, prayFor, deletePrayer } from "../../services/prayerService";
 import { UserContext } from "../../contexts/UserContext";
 import { Button } from "../ui/button";
@@ -7,19 +7,23 @@ import PrayerCard from "./PrayerCard";
 import SignInInline from "./SignInInline";
 import PrayerDialogForm from "./PrayerDialogForm";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 const Dashboard = () => {
   const { user } = useContext(UserContext);
   const [prayers, setPrayers] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isCarousel, setIsCarousel] = useState(true);
   const [newPrayer, setNewPrayer] = useState({
     studentName: "",
     ministryGroup: "",
-    status:"",
+    status: "",
     content: "",
   });
   const [loading, setLoading] = useState(true);
+
+  const carouselRef = useRef(null); // for auto-scrolling
 
   useEffect(() => {
     fetchPrayers();
@@ -45,9 +49,19 @@ const Dashboard = () => {
     try {
       const created = await createPrayer({ ...newPrayer, createdBy: user._id });
       setPrayers((prev) => [created, ...prev]);
-      setNewPrayer({ studentName: "", ministryGroup: "", content: "" });
+      setNewPrayer({ studentName: "", ministryGroup: "", status: "", content: "" });
       setDialogOpen(false);
       toast.success("Prayer created successfully!");
+
+      // Auto-scroll to the first slide if in carousel mode
+      if (carouselRef.current) {
+        setTimeout(() => {
+          const firstSlide = carouselRef.current.querySelector("[data-carousel-slide='0']");
+          if (firstSlide) {
+            firstSlide.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 300); // slight delay after DOM updates
+      }
     } catch (err) {
       console.error("Error creating prayer", err);
       toast.error("Failed to create prayer.");
@@ -56,24 +70,18 @@ const Dashboard = () => {
 
   const handleTogglePray = async (prayerId) => {
     if (!user) {
-      toast.error("Please sign in first to pray!"); //keep this toast for unauthenticated users
+      toast.error("Please sign in first to pray!");
       return;
     }
-  
     try {
-      console.log("👉 Sending pray toggle request for:", prayerId, "by user", user._id);
-      
-      const updatedPrayer = await prayFor(prayerId, user._id); //server toggles and returns updated prayer
-      setPrayers((prevPrayers) =>
-        prevPrayers.map((p) => (p._id === prayerId ? updatedPrayer : p))
-      );
-  
+      const updatedPrayer = await prayFor(prayerId, user._id);
+      setPrayers((prev) => prev.map((p) => (p._id === prayerId ? updatedPrayer : p)));
     } catch (err) {
       console.error("Error toggling prayer", err);
-      toast.error("Failed to pray/unpray."); 
+      toast.error("Failed to pray/unpray.");
     }
   };
-  
+
   const handleDeletePrayer = async (prayerId) => {
     try {
       await deletePrayer(prayerId);
@@ -90,41 +98,91 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="flex flex-col items-center px-4 py-6 max-w-screen-md mx-auto">
+    <div className="flex flex-col items-center px-4 py-6 max-w-screen-md mx-auto relative">
+      
+      {/* Sticky Toggle Button */}
+      {user && prayers.length > 0 && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setIsCarousel(prev => !prev)}
+          className="fixed top-4 right-4 z-50 bg-white shadow-md hover:scale-105 transition-transform"
+        >
+          {isCarousel ? "Grid View 🧱" : "Carousel 🎠"}
+        </Button>
+      )}
+
+      {/* ✨ Title Area */}
+      <div className="text-center mb-6">
+        <h1 className="text-4xl font-bold text-indigo-700 mb-2 tracking-tight drop-shadow-sm">
+          ISM Prayer Board
+        </h1>
+        <p className="text-gray-500 text-sm">We pray for our students 🙏</p>
+      </div>
+
+      {/* If not signed in */}
       {!user ? (
-        <>
-          <h1 className="text-3xl font-bold mb-4 text-center">Welcome to ISM Prayer Board</h1>
-          <SignInInline />
-        </>
+        <SignInInline />
       ) : (
         <>
-          <h2 className="text-2xl font-semibold mb-4 text-center">Welcome back, {user.username}! ✨</h2>
           <Button onClick={() => setDialogOpen(true)} className="mb-6 w-full max-w-xs">
             + Add New Prayer
           </Button>
         </>
       )}
 
-      {/* Carousel for Prayer Cards */}
-      <Carousel className="w-full">
-        <CarouselContent>
-          {prayers.map((prayer) => (
-            <CarouselItem key={prayer._id} className="flex justify-center p-2">
-              {/* 👆 flex justify-center here */}
+      {/* Animate switching layouts */}
+      <AnimatePresence mode="wait">
+        {isCarousel ? (
+          <motion.div
+            key="carousel"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="w-full flex justify-center"
+            ref={carouselRef} // attach ref here
+          >
+            <Carousel className="w-full max-w-md mx-auto">
+              <CarouselContent>
+                {prayers.map((prayer, idx) => (
+                  <CarouselItem key={prayer._id} className="p-2" data-carousel-slide={idx}>
+                    <div className="flex justify-center">
+                      <PrayerCard
+                        prayer={prayer}
+                        userId={user?._id}
+                        onTogglePray={handleTogglePray}
+                        onDelete={handleDeletePrayer}
+                      />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious />
+              <CarouselNext />
+            </Carousel>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="grid"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full"
+          >
+            {prayers.map((prayer) => (
               <PrayerCard
+                key={prayer._id}
                 prayer={prayer}
                 userId={user?._id}
                 onTogglePray={handleTogglePray}
                 onDelete={handleDeletePrayer}
               />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
-
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Dialog for adding a prayer */}
       {user && (
