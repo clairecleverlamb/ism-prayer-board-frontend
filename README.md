@@ -3,7 +3,7 @@
 | Resource | URL |
 |---------|-----|
 | 🖥️ Back-End Repo | [Ism-Prayer-Board Backend](https://github.com/clairecleverlamb/ism-prayer-board-backend) |
-| 🌐 Deployed App | [Live App](https://nom-nom-board-frontend.vercel.app/) |
+| 🌐 Deployed App | [Live App](https://ism-prayer-board-frontend.vercel.app/) |
 
 ---
 
