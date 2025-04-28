@@ -21,11 +21,17 @@ export default function PrayerDialogForm({ prayer, onChange, onSubmit, isSubmitt
             value={prayer.studentName}
             onChange={(e) => onChange({ ...prayer, studentName: e.target.value })}
           />
-          <Label>Ministry Group</Label>
+          <Label>Mentor</Label>
           <Input
-            placeholder="Ministry (optional)"
+            placeholder="(optional)"
             value={prayer.ministryGroup}
             onChange={(e) => onChange({ ...prayer, ministryGroup: e.target.value })}
+          />
+          <Label>Status</Label>
+          <Input
+            placeholder="Academic or Work"
+            value={prayer.status}
+            onChange={(e) => onChange({ ...prayer, status: e.target.value })}
           />
           <Label>Prayer Request</Label>
           <Input

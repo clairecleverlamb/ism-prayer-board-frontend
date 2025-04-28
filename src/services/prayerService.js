@@ -10,13 +10,13 @@ export async function getPrayers() {
 }
 
 // POST create a new prayer
-export async function createPrayer({ studentName, ministryGroup = "", content, createdBy }) {
+export async function createPrayer({ studentName, ministryGroup = "", content, status = "", createdBy }) {
   const res = await fetch(BASE_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ studentName, ministryGroup, content, createdBy }),
+    body: JSON.stringify({ studentName, ministryGroup, status, content, createdBy }),
   });
   if (!res.ok) throw new Error("Failed to create prayer");
   return await res.json();

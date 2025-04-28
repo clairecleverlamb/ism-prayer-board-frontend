@@ -17,6 +17,7 @@ const Dashboard = () => {
     studentName: "",
     ministryGroup: "",
     content: "",
+    status:"",
   });
   const [loading, setLoading] = useState(true);
 

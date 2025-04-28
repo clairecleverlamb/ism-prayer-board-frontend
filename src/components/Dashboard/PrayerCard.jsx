@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Minus } from "lucide-react";
+import { Heart, UserRoundMinus } from "lucide-react";
 
 export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
   const { _id, studentName, ministryGroup, content, prayedBy = [], createdBy } = prayer;
@@ -20,12 +20,14 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
         {isOwner && (
           <Button 
             variant="ghost" 
-            size="icon" 
-            className="absolute top-2 right-2 text-red-500 hover:bg-red-100" 
+            size="icon"
             onClick={() => onDelete(_id)}
+            title="Delete this prayer"
+            className="absolute top-1 right-1 p-1 text-red-500 hover:bg-red-100 rounded-full hover:scale-110 transition-transform"
           >
-            <Minus className="w-4 h-4" />
+            <UserRoundMinus className="w-5 h-5" />
           </Button>
+
         )}
         <CardTitle className="text-lg">{studentName || "Unnamed Student"}</CardTitle>
         {ministryGroup && (
