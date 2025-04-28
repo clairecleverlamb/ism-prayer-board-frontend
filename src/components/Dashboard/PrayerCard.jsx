@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, UserRoundMinus } from "lucide-react";
 
 export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
-  const { _id, studentName, ministryGroup, content, prayedBy = [], createdBy } = prayer;
+  const { _id, studentName, ministryGroup, status, content, prayedBy = [], createdBy } = prayer;
 
   const hasPrayed = userId && prayedBy.some(p => p.toString() === userId.toString());
   const isOwner = userId && createdBy && createdBy._id && createdBy._id.toString() === userId.toString();
@@ -32,6 +32,9 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
         <CardTitle className="text-lg">{studentName || "Unnamed Student"}</CardTitle>
         {ministryGroup && (
           <div className="text-sm text-gray-500 mt-1">{ministryGroup}</div>
+        )}
+        {status && (
+          <div className="text-sm text-blue-500">{status}</div> 
         )}
       </CardHeader>
 

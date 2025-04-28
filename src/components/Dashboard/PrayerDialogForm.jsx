@@ -30,7 +30,7 @@ export default function PrayerDialogForm({ prayer, onChange, onSubmit, isSubmitt
           <Label>Status</Label>
           <Input
             placeholder="Academic or Work"
-            value={prayer.status}
+            value={prayer.status ?? ""}
             onChange={(e) => onChange({ ...prayer, status: e.target.value })}
           />
           <Label>Prayer Request</Label>

@@ -16,8 +16,8 @@ const Dashboard = () => {
   const [newPrayer, setNewPrayer] = useState({
     studentName: "",
     ministryGroup: "",
-    content: "",
     status:"",
+    content: "",
   });
   const [loading, setLoading] = useState(true);
 
