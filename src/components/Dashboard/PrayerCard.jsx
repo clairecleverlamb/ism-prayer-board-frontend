@@ -14,7 +14,7 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
   const isOwner = userId && createdBy && createdBy._id && createdBy._id.toString() === userId.toString();
 
   return (
-    <Card className="w-full max-w-sm min-h-[250px] flex flex-col justify-between p-4 shadow-md relative">
+    <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md min-h-[250px] flex flex-col justify-between p-4 shadow-md relative">
       <CardHeader className="relative">
         {/* Delete button */}
         {isOwner && (
@@ -43,7 +43,7 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
           {content || "No prayer request provided."}
         </p>
 
-        <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center justify-between mt-auto gap-4">
           <Button
             variant={hasPrayed ? "default" : "outline"}
             onClick={() => onTogglePray(_id, hasPrayed)} 
@@ -52,7 +52,7 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
             <Heart className={`w-4 h-4 ${hasPrayed ? "fill-current text-red-500" : ""}`} />
             {hasPrayed ? "Prayed" : "Pray"}
           </Button>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 whitespace-nowrap">
             {prayedBy.length} prayed
           </div>
         </div>
