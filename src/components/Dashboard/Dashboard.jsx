@@ -117,7 +117,7 @@ const Dashboard = () => {
         <h1 className="text-4xl font-bold text-indigo-700 mb-2 tracking-tight drop-shadow-sm">
           ISM Prayer Board
         </h1>
-        <p className="text-gray-500 text-sm">We pray for our students 🙏</p>
+        <p className="text-gray-500 text-sm">TODAY WE PRAY FOR OUR STUDENTS</p>
       </div>
 
       {/* If not signed in */}
