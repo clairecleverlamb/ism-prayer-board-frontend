@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext, useRef } from "react";
 import { getPrayers, createPrayer, prayFor, deletePrayer } from "../../services/prayerService";
+import { fetchCurrentUser } from "../../services/authService";
 import { UserContext } from "../../contexts/UserContext";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -26,14 +27,12 @@ const Dashboard = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const carouselRef = useRef(null);
 
+  const adminEmails = ["shufei.lei@acts2.network", "karen.lei@acts2.network", "claire.chen@acts2.network" ];
+
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const res = await fetch("http://localhost:3000/auth/me", {
-          credentials: "include",
-        });
-        if (!res.ok) throw new Error("Not authenticated");
-        const data = await res.json();
+        const data = await fetchCurrentUser();
         setUser(data);
         if (!hasWelcomed) {
           toast.success(`Welcome, ${data.name || data.email}!`);
@@ -65,6 +64,7 @@ const Dashboard = () => {
       fetchPrayers();
     }
   }, [user]);
+
 
   const handleCreatePrayer = async () => {
     if (!newPrayer.studentName || !newPrayer.content) {
@@ -107,6 +107,15 @@ const Dashboard = () => {
   };
 
   const handleDeletePrayer = async (prayerId) => {
+    const prayer = prayers.find((p) => p._id === prayerId);
+    const isCreator = user && prayer?.createdBy?._id === user._id;
+    const isAdmin = user && adminEmails.includes(user.email);
+
+    if (!isCreator && !isAdmin) {
+      toast.error("Only the creator or an admin can delete this prayer.");
+      return;
+    }
+
     try {
       await deletePrayer(prayerId);
       setPrayers((prev) => prev.filter((p) => p._id !== prayerId));
@@ -157,9 +166,15 @@ const Dashboard = () => {
         <p className="text-gray-500 text-sm">TODAY WE PRAY FOR OUR STUDENTS</p>
       </div>
 
-      <Button onClick={() => setDialogOpen(true)} className="mb-6 w-full max-w-xs">
-        + Add New Prayer
-      </Button>
+      <div className="flex flex-col sm:flex-row items-center justify-between w-full max-w-xs gap-3 mb-1">
+        <Button onClick={() => setDialogOpen(true)} className="w-full">
+          + Add New Prayer
+        </Button>
+      </div>
+
+      <div className="text-center w-full text-gray-600 text-sm mb-6">
+        Showing <span className="font-semibold text-indigo-600">{prayers.length}</span> prayer{prayers.length === 1 ? '' : 's'}
+      </div>
 
       {prayers.length > 0 ? (
         <AnimatePresence mode="wait">
@@ -170,7 +185,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
-              className="w-full flex justify-center"
+              className="w-full flex justify-center px-2"
               ref={carouselRef}
             >
               <Carousel className="w-full max-w-md mx-auto">
@@ -199,7 +214,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4 }}
-              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full px-2"
             >
               {prayers.map((prayer) => (
                 <PrayerCard
