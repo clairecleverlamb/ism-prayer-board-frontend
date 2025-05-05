@@ -65,6 +65,20 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Show toast on redirect error
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+
+    if (error === "InvalidEmail") {
+      toast.error("Only Acts2 Network emails are allowed.");
+    } else if (error === "InvalidProfile") {
+      toast.error("Could not retrieve your Google profile.");
+    } else if (error === "OAuthError") {
+      toast.error("Something went wrong during sign-in. Please try again.");
+    }
+  }, []);
+
 
   const handleCreatePrayer = async () => {
     if (!newPrayer.studentName || !newPrayer.content) {
