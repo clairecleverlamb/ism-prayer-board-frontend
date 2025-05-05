@@ -1,11 +1,9 @@
-// src/components/dashboard/SignInInline.jsx
-
 import { Button } from "@/components/ui/button";
-
+import { SERVER_URL } from "@/services/serverAPI"; 
 
 export default function SignInInline() {
   const handleGoogleSignIn = () => {
-    window.location.href = "http://localhost:3000/auth/google"; // TODO: Replace it later 
+    window.location.href = `${SERVER_URL}/auth/google`;
   };
 
   return (
