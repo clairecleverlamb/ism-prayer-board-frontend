@@ -3,7 +3,7 @@ import { SERVER_URL } from "@/services/serverAPI";
 
 export default function SignInInline() {
   const handleGoogleSignIn = () => {
-    window.location.href = `${SERVER_URL}/auth/google`;
+    window.open = (`${SERVER_URL}/auth/google`,  "_self");
   };
 
   return (
