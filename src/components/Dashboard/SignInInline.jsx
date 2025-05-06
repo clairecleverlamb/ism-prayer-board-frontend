@@ -4,10 +4,11 @@ import { SERVER_URL } from "@/services/serverAPI";
 export default function SignInInline() {
   return (
     <div className="flex flex-col items-center gap-4 mt-10">
-      <a
-        href={`${SERVER_URL}/auth/google`}
-        className="w-64" 
-      >
+        <a
+          href={`${SERVER_URL}/auth/google`}
+          target="_self"
+          rel="noopener noreferrer"
+        >
         <Button
           className="w-full flex items-center justify-center gap-2"
           variant="outline"
