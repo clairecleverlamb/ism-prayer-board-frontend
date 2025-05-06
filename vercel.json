@@ -1,6 +1,13 @@
 {
     "rewrites": [
-      { "source": "/(.*)", "destination": "/index.html" }
+      {
+        "source": "/auth/:match*",
+        "destination": "https://prayer-board-backend-bcece8a2a0ee.herokuapp.com/auth/:match*"
+      },
+      {
+        "source": "/api/:match*",
+        "destination": "https://prayer-board-backend-bcece8a2a0ee.herokuapp.com/api/:match*"
+      }
     ],
     "headers": [
       {
@@ -11,4 +18,5 @@
         ]
       }
     ]
-}
+  }
+  
