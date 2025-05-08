@@ -175,7 +175,7 @@ const Dashboard = () => {
 
       <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-indigo-700 mb-2 tracking-tight drop-shadow-sm">
-          ISM Prayer Board
+        ˗ˏˋ ✞ ˎˊ˗ ISM Prayer Board
         </h1>
         <p className="text-gray-500 text-sm">TODAY WE PRAY FOR OUR STUDENTS</p>
       </div>

@@ -29,7 +29,7 @@ const DashboardNavBar = () => {
               : "text-left"
           }`}
         >
-           ISM Prayer Board
+          ISM Prayer Board
         </li>
 
         <div className="flex gap-4 ml-auto">
