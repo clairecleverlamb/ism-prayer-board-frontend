@@ -60,7 +60,7 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
         </div>
         {createdAt && (
           <div className="text-xs text-gray-400 mt-4">
-            Create at {format(new Date(createdAt), "MMM d, yyyy")}
+            Created at {format(new Date(createdAt), "MMM d, yyyy")}
           </div>
         )}
       </CardContent>
