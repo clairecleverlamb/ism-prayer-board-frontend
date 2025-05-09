@@ -6,9 +6,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, UserRoundMinus } from "lucide-react";
+import { format } from "date-fns";
+
 
 export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
-  const { _id, studentName, ministryGroup, status, content, prayedBy = [], createdBy } = prayer;
+  const { _id, studentName, ministryGroup, status, content, prayedBy = [], createdBy, createdAt } = prayer;
 
   const hasPrayed = userId && prayedBy.some(p => p.toString() === userId.toString());
   const isOwner = userId && createdBy && createdBy._id && createdBy._id.toString() === userId.toString();
@@ -56,6 +58,11 @@ export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
             {prayedBy.length} prayed
           </div>
         </div>
+        {createdAt && (
+          <div className="text-xs text-gray-400 mt-4">
+            Create at {format(new Date(createdAt), "MMM d, yyyy")}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
