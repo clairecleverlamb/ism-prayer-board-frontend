@@ -11,6 +11,39 @@ import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
+
+function CarouselCounter({ current, total }) {
+  return (
+    <div className="mt-3 text-center text-xs text-gray-500">
+      <span className="inline-block bg-gray-100 rounded px-2 py-1">
+        {current} / {total}
+      </span>
+    </div>
+  );
+}
+
+function CardIndex({ current, total }) {
+  return (
+    <div className="mt-3 text-center text-xs text-gray-500">
+      <span className="inline-block bg-gray-100 rounded px-2 py-1 flex items-center justify-center gap-1">
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={current}
+            initial={{ y: -5, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 5, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="text-indigo-600 font-semibold text-sm"
+          >
+            {current}
+          </motion.span>
+        </AnimatePresence>
+        <span className="text-gray-500">/ {total}</span>
+      </span>
+    </div>
+  );
+}
+
 const Dashboard = () => {
   const { user, setUser } = useContext(UserContext);
   const [hasWelcomed, setHasWelcomed] = useState(false);
@@ -26,6 +59,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
   const carouselRef = useRef(null);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(1);
+
 
   const adminEmails = ["shufei.lei@acts2.network", "karen.lei@acts2.network", "claire.chen@acts2.network" ];
 
@@ -202,17 +237,28 @@ const Dashboard = () => {
               className="w-full flex justify-center px-2"
               ref={carouselRef}
             >
-              <Carousel className="w-full max-w-md mx-auto">
+            <>
+              <Carousel
+                className="w-full max-w-md mx-auto"
+                setApi={(api) => {
+                  if (!api) return;
+                  setCurrentSlideIndex(api.selectedScrollSnap() + 1); 
+                  api.on("select", () => {
+                    setCurrentSlideIndex(api.selectedScrollSnap() + 1);
+                  });
+                }}
+              >
                 <CarouselContent>
                   {prayers.map((prayer, idx) => (
                     <CarouselItem key={prayer._id} className="p-2" data-carousel-slide={idx}>
-                      <div className="flex justify-center">
+                      <div className="flex flex-col items-center">
                         <PrayerCard
                           prayer={prayer}
                           userId={user?._id}
                           onTogglePray={handleTogglePray}
                           onDelete={handleDeletePrayer}
                         />
+                        <CardIndex current={currentSlideIndex} total={prayers.length} />
                       </div>
                     </CarouselItem>
                   ))}
@@ -220,6 +266,7 @@ const Dashboard = () => {
                 <CarouselPrevious />
                 <CarouselNext />
               </Carousel>
+            </>
             </motion.div>
           ) : (
             <motion.div
