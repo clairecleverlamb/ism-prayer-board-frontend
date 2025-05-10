@@ -254,7 +254,7 @@ const Dashboard = () => {
                       <div className="flex flex-col items-center">
                         <PrayerCard
                           prayer={prayer}
-                          userId={user?._id}
+                          user={user}
                           onTogglePray={handleTogglePray}
                           onDelete={handleDeletePrayer}
                         />
@@ -281,7 +281,7 @@ const Dashboard = () => {
                 <PrayerCard
                   key={prayer._id}
                   prayer={prayer}
-                  userId={user?._id}
+                  user={user}
                   onTogglePray={handleTogglePray}
                   onDelete={handleDeletePrayer}
                 />

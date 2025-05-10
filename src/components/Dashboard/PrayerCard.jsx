@@ -9,17 +9,18 @@ import { Heart, UserRoundMinus } from "lucide-react";
 import { format } from "date-fns";
 
 
-export default function PrayerCard({ prayer, userId, onTogglePray, onDelete }) {
+export default function PrayerCard({ prayer, user, onTogglePray, onDelete }) {
   const { _id, studentName, ministryGroup, status, content, prayedBy = [], createdBy, createdAt } = prayer;
-
-  const hasPrayed = userId && prayedBy.some(p => p.toString() === userId.toString());
+  const userId = user?._id;
   const isOwner = userId && createdBy && createdBy._id && createdBy._id.toString() === userId.toString();
+  const isAdmin = user?.isAdmin;
+  const hasPrayed = userId && prayedBy.some(p => p.toString() === userId.toString());
 
   return (
     <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md min-h-[250px] flex flex-col justify-between p-4 shadow-md relative">
       <CardHeader className="relative">
         {/* Delete button */}
-        {isOwner && (
+        {(isOwner || isAdmin) && (
           <Button 
             variant="ghost" 
             size="icon"
